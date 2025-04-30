@@ -12,10 +12,14 @@ class Calculation:
         print(self.calculationLine)
 
     def GetLastSymbol(self):
-        return self.calculationLine[-1]
+        if self.calculationLine != "":
+            return self.calculationLine[-1]
+        else:
+            return ""
 
     def DeleteLastSymbol(self):
-        self.calculationLine = self.calculationLine[0:-1]
+        if self.calculationLine != "":
+            self.calculationLine = self.calculationLine[0:-1]
 
 
 calc1 = Calculation()
