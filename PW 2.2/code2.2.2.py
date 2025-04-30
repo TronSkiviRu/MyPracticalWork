@@ -21,9 +21,11 @@ class Train:
 
 train1 = Train("Барселона-Кипр", 666, "11.00")
 train2 = Train("Барселона-Москва", 686, "11.00")
-Train.find_train_info(666)
 Train.find_train_info(6860)
 train1.find_train_info(686)
 del train2
 print(train1.train_array)
+
+input_client = int(input("Введи номер желанного поезда: "))
+Train.find_train_info(input_client)
 
