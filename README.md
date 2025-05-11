@@ -27,3 +27,5 @@
 
 [Ссылка на мой гитхаб профиль](https://github.com/TronSkiviRu)
 
+[Очень крутая документация по гитхаб на гитхабе на русском](https://github.com/cyberspacedk/Git-commands)
+
