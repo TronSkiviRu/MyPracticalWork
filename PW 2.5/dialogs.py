@@ -294,3 +294,97 @@ def handle_message(message):
 for i, info in enumerate(texts_for_base_script, 1):
     info += f"\n===ОСНОВНЫЕ СКРИПТЫ===\n_Запись {i}_"
     texts_for_base_script[i-1] = info
+
+texts_for_useful_script = [
+    """
+С помощью этого сообщения можно регулировать режимами бота
+Это обычный режим: бот не имеет особых панелей
+ОБЫЧНЫЙ РЕЖИМ
+≈≈≈ ПОЛЕЗНЫЙ СКРИПТ ≈≈≈
+_Запись 1_
+    """,
+    """
+Элементы реализации камень ножницы бумага
+```
+from random import randint
+
+
+def select_item():
+    item3_arr = ["👊", "✋", "✌"]
+    return item3_arr[randint(0, 2)]
+
+def result(player_arm, bot_arm):
+    if player_arm == bot_arm:
+         return "Ничья"
+    elif (player_arm == "👊" and bot_arm == "✌" or
+          player_arm == "✋" and bot_arm == "👊" or
+          player_arm == "✌" and bot_arm == "✋"):
+         return "Победа"
+    else:
+        return "Поражение"
+    
+@bot.message_handler(func=lambda message:
+message.text in ("👊", "✋", "✌") and user_useful_script_index[message.from_user.id]==1)
+def handle_message(message):
+    player_move = message.text
+    bot_move = select_item()
+    info_str = result(player_move, bot_move)
+    bot.send_message(message.chat.id, bot_move)
+    bot.send_message(message.chat.id, info_str)
+```
+-МОД-
+КАМЕНЬ НОЖНИЦЫ БУМАГА
+≈≈≈ ПОЛЕЗНЫЙ СКРИПТ ≈≈≈
+_Запись 2_
+    """,
+    """
+А хотите бот-знакомств с котятами?
+```
+from random import choice
+import requests
+
+CAT_API_URL = 'https://api.thecatapi.com/v1/images/search'
+CAT_API_KEY = 'live_jISbjZpCsZlb35iH0j4bZSKnkOior5RAxVusNrNOhw8WtuToscEYA3VcgZIoadhh'
+
+
+cat_names = ("Муся", "Шкурка", "Мадонна", "Мася", "Пушинка", "Фрикаделька", "Киса", "Кися",
+            "ТракторМурка", "Лизоок", "Ням-ня")
+
+start_phrase = [
+    "Истина",
+    "Бытие",
+    "Смысл существования",
+    "Путь души",
+    "Свет разума"
+]
+
+main_phrase = [
+    "находится в глубине",
+    "отражается в",
+    "проявляется через",
+    "исходит из",
+    "оживляет"
+]
+
+end_phrase = [
+    "вечности",
+    "моря времени",
+    "безмолвия ночи",
+    "огня бытия",
+    "тишины вселенной"
+]
+
+
+def generate_profile():
+    part0 = choice(cat_names)
+    part1 = choice(start_phrase)
+    part2 = choice(main_phrase)
+    part3 = choice(end_phrase)
+    return f"{part0}:\n{part1} {part2} {part3}."
+```
+-МОД-
+❣❤️ДАЙВИНЧИКсКОШКАМИ❤️❣
+≈≈≈ ПОЛЕЗНЫЙ СКРИПТ ≈≈≈
+_Запись 3_
+    """
+]
