@@ -80,26 +80,6 @@ def create_markup_for_text_info(index, action: str, prev: str, nextt: str):
     return markup
 
 
-def get_reply_keyboard():
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn_location = types.KeyboardButton('Отправить локацию', request_location=True)
-    btn_contact = types.KeyboardButton('Отправить контакт', request_contact=True)
-    btn_remove = types.KeyboardButton('Удалить клавиатуру')
-    markup.add(btn_location, btn_contact)
-    markup.add(btn_remove)
-    return markup
-
-
-def get_inline_keyboard():
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton('Кнопка 1', callback_data='btn1')
-    btn2 = types.InlineKeyboardButton('Кнопка 2', callback_data='btn2')
-    btn_url = types.InlineKeyboardButton('Перейти на Google', url='https://google.com')
-    markup.add(btn1, btn2)
-    markup.add(btn_url)
-    return markup
-
-
 def create_inline_keyboard():
     markup = types.InlineKeyboardMarkup()
     button1 = types.InlineKeyboardButton(text="Нажми меня", callback_data="button_pressed")
