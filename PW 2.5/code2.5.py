@@ -3,6 +3,9 @@ from telebot import types
 from dialogs import texts_for_base_title, texts_for_base_script
 import datetime
 import threading
+import emoji
+
+all_emojis = emoji.EMOJI_DATA
 
 
 API_TOKEN = '7855332191:AAGHexenIUI_W5O1xQkNH-JYOJJ3BHw2gfk'
@@ -30,7 +33,7 @@ bot = telebot.TeleBot(API_TOKEN)
 
 bot.set_my_commands([
     types.BotCommand("start", "Перезапустить бота"),
-    types.BotCommand("help_comands", "Список доступных команд"),
+    types.BotCommand("help_commands", "Список доступных команд"),
     types.BotCommand("base_title", "Необходимая База для работы"),
     types.BotCommand("base_script", "Базовые функции библеотеки"),
     types.BotCommand("useful_commands", "То, что можно запустить в запустить в боте"),
@@ -54,6 +57,7 @@ def help_command(message):
         "/example_inline_keyboard - Пример, Inline Buttons\n"
         "/force_answer - Вызвать запрос на ответ (ForceReply)\n"
         "/time - Показать текущее время\n"
+        "/fun_panel - Поднимает панель с эмоциями\n"
         "/about_us - Информация о боте и разработчике\n"
         "/Боту можно отправить картинку и стикер\n"
         "Также можно отправить локацию или контакт напрямую."
@@ -117,8 +121,9 @@ def help_about(message):
 Почти на любую операцию бот скидывает код функционала
 Боту можно отправить картинку, он отправит её обратно, можно отправить стикер, он его тоже вернет
 В остальном можно бота модифицировать, через /useful\_commands
-В боте реализована сложная защита от спама
-Бот красивый, умничка, могет
+В боте реализована сложная защита от любого спама
+Бот не любит пустые слова, поэтому он их удаляет
+Бот красивый, умничка, могет...
 
 Над проетом трудился отзывчивая группастудентов можешь отблагодарить их:
 `2202 2050 8788 1279` - Сбер
@@ -192,7 +197,7 @@ def inline(message):
             bot.send_photo(message.chat.id, photo, caption="Это подпись к картинке.")
     except Exception as e:
         bot.send_message(message.chat.id, f"Ошибка при отправке фото: {e}")
-    bot.send_message(message.chat.id, texts_for_base_script[1], parse_mode="Markdown")
+
 
 
 @bot.message_handler(content_types=['photo'])
@@ -200,7 +205,6 @@ def inline(message):
 def echo_photo(message):
     photo_id = message.photo[-1].file_id
     bot.send_photo(message.chat.id, photo_id)
-    bot.send_message(message.chat.id, texts_for_base_script[0], parse_mode="Markdown")
 
 
 @bot.message_handler(content_types=['sticker'])
@@ -209,9 +213,6 @@ def echo_sticker(message):
     sticker_id = message.sticker.file_id
     bot.reply_to(message, "Айди этого стикера: "+sticker_id)
     bot.send_sticker(message.chat.id, sticker_id)
-    bot.send_message(message.chat.id, texts_for_base_script[2], parse_mode="Markdown")
-
-
 
 
 @bot.message_handler(commands=['get_sticker'])
@@ -219,7 +220,6 @@ def echo_sticker(message):
 def send_sticker(message):
     sticker_id = 'CAACAgIAAxkBAAIBqmgi_zt-MU8bStQBr-a7urNighUnAALYGAACO7hBSM-pC_BdrnNtNgQ'
     bot.send_sticker(message.chat.id, sticker_id)
-    bot.send_message(message.chat.id, texts_for_base_script[3], parse_mode="Markdown")
 
 
 @bot.message_handler(commands=['learn_python'])
@@ -233,13 +233,12 @@ def send_document(message):
                 bot.send_document(message.chat.id, doc, caption="Выучи Python за месяц!")
         except Exception as e:
             bot.send_message(message.chat.id, f"Ошибка при отправке документа: {e}")
-        bot.send_message(message.chat.id, texts_for_base_script[4], parse_mode="Markdown")
 
 
 @execution_lock
 @bot.message_handler(commands=['force_answer'])
 def force_reply(message):
-    markup = types.ForceReply(selective=False)
+    markup = types.ForceReply()
     bot.send_message(message.chat.id, "Ответьте на это сообщение:", reply_markup=markup)
 
 
@@ -248,7 +247,7 @@ def force_reply(message):
 def send_time(message):
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     bot.send_message(message.chat.id, f"Текущее время: {current_time}")
-# Удаление кастомной клавиатуры
+
 
 @execution_lock
 @bot.message_handler(func=lambda message: message.text == 'Удалить клавиатуру')
@@ -259,15 +258,15 @@ def remove_keyboard(message):
 @bot.message_handler(content_types=['location'])
 def handle_location(message):
     loc = message.location
-    bot.send_message(message.chat.id, f"Вы отправили локацию:\nШирота: {loc.latitude}\nДолгота: {loc.longitude}")
-# Обработка присланного контакта
+    bot.send_message(message.chat.id,
+                     f"Вы отправили локацию:\nШирота: {loc.latitude}\nДолгота: {loc.longitude}")
 
 
 @bot.message_handler(content_types=['contact'])
 def handle_contact(message):
     contact = message.contact
-    bot.send_message(message.chat.id, f"Вы отправили контакт:\nИмя: {contact.full_name}\nНомер: {contact.phone_number}")
-# Обработка inline-кнопок (btn1, btn2)
+    bot.send_message(message.chat.id,
+                     f"Вы отправили контакт:\nИмя: {contact.first_name}\nНомер: {contact.phone_number}")
 
 
 @bot.message_handler(commands=['/to_be_a_millionaire'])
@@ -359,12 +358,35 @@ def start_command(message):
     )
 
 
+@bot.message_handler(commands=['fun_panel'])
+def send_welcome(message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+    button1 = types.KeyboardButton("😂")
+    button2 = types.KeyboardButton("🤩")
+    button3 = types.KeyboardButton("😍")
+    button4 = types.KeyboardButton("😜")
+
+    keyboard.add(button1, button2)
+    keyboard.add(button3, button4)
+
+    bot.send_message(message.chat.id, "Выберите кнопку:", reply_markup=keyboard)
+
+@bot.message_handler(func=lambda message: message.text in ("😂", "🤩", "😍", "😜"))
+def handle_message(message):
+    bot.reply_to(message, "👍", reply_markup=types.ReplyKeyboardRemove())
+
+
 @bot.message_handler(content_types=['text', 'animation'])
+@execution_lock
 def delete_text_message(message):
+    if message.text in all_emojis:
+        return
     try:
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     except Exception as e:
         print(f"Ошибка при удалении сообщения {message.message_id}: {e}")
+
 
 
 if __name__ == '__main__':

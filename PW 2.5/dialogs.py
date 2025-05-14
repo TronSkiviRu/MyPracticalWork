@@ -50,42 +50,75 @@ bot = telebot.TeleBot(API_TOKEN) - делает экземпляр класса 
 bot.infinity_polling() - не выключает запуск программы, держит бота в автономном режиме
 
 Так мы связали нашего телеграм бота с нашим кодом, ура  
-
     """,
     """
 _4/5:_
-Для того, чтобы заставллять бота делать что-то надо читать 
+Для того, чтобы заставить бота что-то делать надо читать 
 [Документацию по pyTelegramBotAPI на русском](https://pytba.readthedocs.io/ru/latest/)
 
-Или продолжить пользоваться ботом и вы узнаете, как пользоваться основными функциями бота
+Или продолжить пользоваться ботом и вы узнаете, как пользоваться основными функциями бота.
 Жми /help\_commands и иди по списку вниз, по новым командам
-
     """,
     """
 _5/5:_
 Появились вопросы? Обращайся к моему [личному AI-агенту](https://gpt-chatbot.ru/openai-o3-mini)
 Знает все, ответит на все вопросы!
 Исправит любую ошибку!
-
     """
 ]
+for i, info in enumerate(texts_for_base_title):
+    info += "\n===БАЗОВЫЙ МАНУАЛ==="
+    texts_for_base_title[i] = info
+
 texts_for_base_script = [
     """
-Бот отправляющий картинку в ответ на полученную картинку
+Реализация отправки сообщения, например, с временем 
+```
+@bot.message_handler(commands=['time'])
+def send_time(message):
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    bot.send_message(message.chat.id, f"Текущее время: {current_time}")
+```
+/time
+    """,
+    """
+Реализация выделения сообщения ботом
+```
+@bot.message_handler(commands=['force_answer'])
+def force_reply(message):
+    markup = types.ForceReply()
+    bot.send_message(message.chat.id, "Ответьте на это сообщение:")
+```
+/force\_answer
+    """,
+    """
+Реализация обработки контакта и локации
+```
+@bot.message_handler(content_types=['location'])
+def handle_location(message):
+    loc = message.location
+    bot.send_message(message.chat.id, f"Вы отправили локацию:\nШирота: {loc.latitude}\nДолгота: {loc.longitude}")
 
+
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    contact = message.contact
+    bot.send_message(message.chat.id, f"Вы отправили контакт:\nИмя: {contact.first_name}\nНомер: {contact.phone_number}")
+```
+Скинь локацию или контакт
+    """,
+    """
+Реализация отправления картинки в чат, в ответ на картинку
 ```
 @bot.message_handler(content_types=['photo'])
 def echo_photo(message):
     photo_id = message.photo[-1].file_id
     bot.send_photo(message.chat.id, photo_id)
 ```
-Получили айди фотки и отправили его же через функцию
-
+Скинь фотки
     """,
     """
-
-Введя слудующую команду бот скинет фото в чат, важно чтобы файл с фото был в директории проекта
-
+Реализация отправки картинки из директории проекта
 ```
 bot.message_handler(commands=['get_photo_vulkan'])
 def inline(message):
@@ -97,12 +130,10 @@ def inline(message):
     except Exception as e:
         bot.send_message(message.chat.id, f"Ошибка при отправке фото: {e}")
 ```
-
-
+/get\_photo\_vulkan
     """,
     """
-Бот вернет вам ваш телеграмм стикер в ответ на ваш телеграм стикер, и выдаст его айди
-
+Реализация отправки стикера в ответ на стикер и вывод его ID
 ```
 @bot.message_handler(content_types=['sticker'])
 def echo_sticker(message):
@@ -110,30 +141,24 @@ def echo_sticker(message):
     bot.reply_to(message, "Айди этого стикера: "+sticker_id)
     bot.send_sticker(message.chat.id, sticker_id)
 ```
-
-
+Пришли стикер
     """,
     """
-Бот вернет указанный в айди телеграмм стикер по соответствующей команде
-
+Реализация отправки указанного стикера по ID
 ```
 @bot.message_handler(commands=['get_sticker'])
 def send_sticker(message):
     sticker_id = 'CAACAgIAAxkBAAIBqmgi_zt-MU8bStQBr-a7urNighUnAALYGAACO7hBSM-pC_BdrnNtNgQ'
     bot.send_sticker(message.chat.id, sticker_id)
 ```
-
+/get\_sticker
     """,
     """
-Этот код скидывает документ, в нем есть защита от спама с помощью глобальной переменной
-Также при отправке файла бот будет иметь подпись что отправляется файл
-
+Реализация отправки документа с подписью
+ВАЖНО иметь этот файл в директории проекта
 ```
 @bot.message_handler(commands=['learn_python'])
 def send_document(message):
-    global one_start_file
-    if one_start_file:
-        one_start_file = False
         chat_id = message.chat.id
         bot.send_message(chat_id, "Подождите, файл отправляется...")
         bot.send_chat_action(chat_id, action='upload_document')
@@ -142,14 +167,16 @@ def send_document(message):
                 bot.send_document(message.chat.id, doc, caption="Выучи Python за месяц!")
         except Exception as e:
             bot.send_message(message.chat.id, f"Ошибка при отправке документа: {e}")
-        one_start_file = True
 ```
+/learn\_python
     """,
     """
-Рассмотрим код который позволяет вывести сообщение рядом с которым будут кнопки или инлайн кнопки.
-Для этого применяется метод send\_message с параметром reply\_markup, в который передается объект InlineKeyboardMarkup.
-Мы это сделаем через функцию
+Реализация сообщения с инлайн кнопками
+Применяем метод send\_message с параметром reply\_markup, в который передается объект InlineKeyboardMarkup.
 
+Для обработки нажатий на инлайн кнопки используется специальный декоратор, который принимает функцию-обработчик 
+колбэков. Делается с помощью @bot.callback_query_handler. Обработчик получает объект call, 
+из которого можно извлечь данные, такие как call.data, call.message, call.id и т.д.
 ```
 def create_inline_keyboard():
     markup = types.InlineKeyboardMarkup()
@@ -178,16 +205,10 @@ def callback_handler(call):
     else:
         bot.answer_callback_query(call.id, "Неизвестное действие.")
 ```
-Кода много давай разбираться:
-Для обработки нажатий на инлайн кнопки используется специальный декоратор, который принимает функцию-обработчик 
-колбэков. Делается с помощью @bot.callback_query_handler. Обработчик получает объект call, 
-из которого можно извлечь данные, такие как call.data, call.message, call.id и т.д.
-
 Можешь попробовать в живую /example\_inline\_keyboard
     """,
     """
-Реализация удалений сообщений через бота
-
+Реализация удалений сообщений
 ```
 @bot.message_handler(commands=['/to\_be\_a\_millionaire'])
 def delete_text_message(message):
@@ -198,17 +219,6 @@ def delete_text_message(message):
         print(f"Ошибка при удалении сообщения {message.message\_id}: {e}")
 ```
 Попробуй /to\_be\_a\_millionaire
-    """,
-    """
-Сообщает время
-
-```
-@bot.message_handler(commands=['time'])
-def send_time(message):
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    bot.send_message(message.chat.id, f"Текущее время: {current_time}")
-```
-/time
     """,
     """
 Реализация защиты от спама
@@ -254,7 +264,33 @@ def handle_message(message):
         except Exception as e:
             print(f"Ошибка при удалении сообщения {message.message_id}: {e}")
 ```
-Попробуй сюда заспамить, дружок;)
+Попробуй сюда заспамить
     """,
+    """
+Реализация нижней панели с кнопками, её обработка, закрытие
+```
+@bot.message_handler(commands=['fun_panel'])
+def send_welcome(message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
+    button1 = types.KeyboardButton("😂")
+    button2 = types.KeyboardButton("🤩")
+    button3 = types.KeyboardButton("😍")
+    button4 = types.KeyboardButton("😜")
+
+    keyboard.add(button1, button2)
+    keyboard.add(button3, button4)
+
+    bot.send_message(message.chat.id, "Выберите кнопку:", reply_markup=keyboard)
+
+@bot.message_handler(func=lambda message: message.text in ("😂", "🤩", "😍", "😜"))
+def handle_message(message):
+    bot.reply_to(message, "👍", reply_markup=types.ReplyKeyboardRemove())
+```
+/fun\_panel
+    """
 ]
+
+for i, info in enumerate(texts_for_base_script, 1):
+    info += f"\n===ОСНОВНЫЕ СКРИПТЫ===\n_Запись {i}_"
+    texts_for_base_script[i-1] = info
